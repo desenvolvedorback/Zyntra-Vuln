@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZyntraVuln — Security Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #060810;
+      --bg2: #0c1020;
+      --bg3: #111828;
+      --border: #1e2d4a;
+      --border2: #243560;
+      --blue: #2d7aff;
+      --blue-dim: #1a4a9e;
+      --blue-glow: rgba(45, 122, 255, 0.18);
+      --cyan: #00d4ff;
+      --red: #ff3b5c;
+      --orange: #ff7b2d;
+      --yellow: #ffc72d;
+      --green: #00e676;
+      --text: #e2e8f8;
+      --text2: #7a8bb0;
+      --text3: #4a5878;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* GRID BACKGROUND */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.18;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* HEADER */
+    header {
+      position: relative;
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+      background: rgba(6, 8, 16, 0.92);
+      backdrop-filter: blur(12px);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+    }
+
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--blue);
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 8px var(--blue);
+      }
+
+      50% {
+        box-shadow: 0 0 22px var(--cyan);
+      }
+    }
+
+    .logo span {
+      color: var(--blue);
+    }
+
+    .header-meta {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--text3);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    /* MAIN LAYOUT */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--cyan);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      padding: 4px 12px;
+      border-radius: 2px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+
+    h1 em {
+      font-style: normal;
+      color: var(--blue);
+    }
+
+    .hero-sub {
+      color: var(--text2);
+      font-size: 0.95rem;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* SCAN CARD */
+    .scan-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px;
+      margin-bottom: 32px;
+    }
+
+    .input-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text3);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .input-label::before {
+      content: '>';
+      color: var(--blue);
+    }
+
+    .input-area {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    textarea,
+    .input-detect {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.875rem;
+      padding: 14px 16px;
+      resize: vertical;
+      min-height: 120px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      line-height: 1.6;
+    }
+
+    textarea:focus {
+      border-color: var(--blue-dim);
+      box-shadow: 0 0 0 3px var(--blue-glow);
+    }
+
+    textarea::placeholder {
+      color: var(--text3);
+    }
+
+    .type-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      padding: 3px 8px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .type-badge.visible {
+      opacity: 1;
+    }
+
+    .type-badge.URL {
+      background: rgba(45, 122, 255, 0.2);
+      color: var(--blue);
+      border: 1px solid var(--blue-dim);
+    }
+
+    .type-badge.IP {
+      background: rgba(0, 212, 255, 0.15);
+      color: var(--cyan);
+      border: 1px solid rgba(0, 212, 255, 0.4);
+    }
+
+    .type-badge.CODIGO {
+      background: rgba(0, 230, 118, 0.12);
+      color: var(--green);
+      border: 1px solid rgba(0, 230, 118, 0.3);
+    }
+
+    .type-badge.DOMINIO {
+      background: rgba(255, 199, 45, 0.12);
+      color: var(--yellow);
+      border: 1px solid rgba(255, 199, 45, 0.3);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-scan {
+      flex: 1;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 13px 24px;
+      font-family: var(--mono);
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-scan:hover:not(:disabled) {
+      background: #3d8aff;
+      box-shadow: 0 0 20px rgba(45, 122, 255, 0.4);
+    }
+
+    .btn-scan:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    .btn-scan:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-clear {
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      border-radius: 6px;
+      padding: 13px 18px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-clear:hover {
+      border-color: var(--text2);
+      color: var(--text);
+    }
+
+    /* SPINNER */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* STATUS BAR */
+    .status-bar {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text3);
+      padding: 8px 0 0;
+      min-height: 24px;
+      letter-spacing: 0.05em;
+    }
+
+    .status-bar.loading {
+      color: var(--cyan);
+    }
+
+    .status-bar.error {
+      color: var(--red);
+    }
+
+    /* RESULTS */
+    #results {
+      display: none;
+    }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .results-title {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text3);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .btn-copy-all {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      border-radius: 5px;
+      padding: 7px 14px;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.08em;
+    }
+
+    .btn-copy-all:hover {
+      border-color: var(--blue-dim);
+      color: var(--blue);
+    }
+
+    .btn-copy-all.copied {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    /* SCORE PANEL */
+    .score-panel {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 24px;
+      align-items: center;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .score-ring {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      flex-shrink: 0;
+    }
+
+    .score-ring svg {
+      transform: rotate(-90deg);
+    }
+
+    .score-ring .track {
+      fill: none;
+      stroke: var(--bg3);
+      stroke-width: 6;
+    }
+
+    .score-ring .fill {
+      fill: none;
+      stroke-width: 6;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s ease;
+    }
+
+    .score-number {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+    }
+
+    .score-number .num {
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .score-number .label {
+      font-size: 0.55rem;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .score-meta {
+      min-width: 0;
+    }
+
+    .score-nivel {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .score-resumo {
+      font-size: 0.88rem;
+      color: var(--text2);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .score-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      padding: 3px 8px;
+      border-radius: 3px;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      letter-spacing: 0.05em;
+    }
+
+    /* SECTION */
+    .section {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    .section-header:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .section-title {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-count {
+      background: var(--blue-dim);
+      color: #fff;
+      font-size: 0.65rem;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .chevron {
+      color: var(--text3);
+      font-size: 0.8rem;
+      transition: transform 0.2s;
+    }
+
+    .section.collapsed .chevron {
+      transform: rotate(-90deg);
+    }
+
+    .section.collapsed .section-body {
+      display: none;
+    }
+
+    .section-body {
+      padding: 20px;
+    }
+
+    /* VULN CARDS */
+    .vuln-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .vuln-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .vuln-card:hover {
+      border-color: var(--border2);
+    }
+
+    .vuln-header {
+      padding: 14px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      cursor: pointer;
+    }
+
+    .sev-badge {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 3px;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .sev-CRÍTICA,
+    .sev-CRITICA {
+      background: rgba(255, 59, 92, 0.2);
+      color: var(--red);
+      border: 1px solid rgba(255, 59, 92, 0.4);
+    }
+
+    .sev-ALTA {
+      background: rgba(255, 123, 45, 0.2);
+      color: var(--orange);
+      border: 1px solid rgba(255, 123, 45, 0.4);
+    }
+
+    .sev-MÉDIA,
+    .sev-MEDIA {
+      background: rgba(255, 199, 45, 0.18);
+      color: var(--yellow);
+      border: 1px solid rgba(255, 199, 45, 0.35);
+    }
+
+    .sev-BAIXA {
+      background: rgba(0, 230, 118, 0.12);
+      color: var(--green);
+      border: 1px solid rgba(0, 230, 118, 0.3);
+    }
+
+    .sev-INFO {
+      background: rgba(45, 122, 255, 0.15);
+      color: var(--blue);
+      border: 1px solid rgba(45, 122, 255, 0.3);
+    }
+
+    .vuln-title-group {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .vuln-id {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--text3);
+      margin-bottom: 3px;
+    }
+
+    .vuln-title {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .vuln-meta-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+
+    .meta-chip {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--text3);
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 3px;
+    }
+
+    .vuln-chevron {
+      color: var(--text3);
+      font-size: 0.75rem;
+      margin-top: 4px;
+      flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+
+    .vuln-card.open .vuln-chevron {
+      transform: rotate(90deg);
+    }
+
+    .vuln-body {
+      display: none;
+      padding: 0 18px 18px;
+      border-top: 1px solid var(--border);
+    }
+
+    .vuln-card.open .vuln-body {
+      display: block;
+    }
+
+    .vuln-section-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--blue);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin: 16px 0 6px;
+    }
+
+    .vuln-text {
+      font-size: 0.85rem;
+      color: var(--text2);
+      line-height: 1.7;
+    }
+
+    .code-block {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 5px;
+      padding: 12px 14px;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: #a8c7fa;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.6;
+      position: relative;
+    }
+
+    .btn-copy-snippet {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      color: var(--text3);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-copy-snippet:hover {
+      color: var(--blue);
+      border-color: var(--blue-dim);
+    }
+
+    .btn-copy-snippet.copied {
+      color: var(--green);
+      border-color: var(--green);
+    }
+
+    .list-items {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .list-item {
+      font-size: 0.82rem;
+      color: var(--text2);
+      padding: 5px 0 5px 14px;
+      border-left: 2px solid var(--border2);
+      line-height: 1.5;
+    }
+
+    .list-item::before {
+      color: var(--text3);
+    }
+
+    .cvss-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .cvss-score-big {
+      font-family: var(--mono);
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    .cvss-vector {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--text3);
+      word-break: break-all;
+      line-height: 1.5;
+    }
+
+    .dificuldade-bar {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .dif-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--border2);
+      transition: background 0.2s;
+    }
+
+    /* CHAIN CARDS */
+    .chain-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--orange);
+      border-radius: 6px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+
+    .chain-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .chain-title {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--orange);
+      margin-bottom: 6px;
+    }
+
+    .chain-desc {
+      font-size: 0.82rem;
+      color: var(--text2);
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .chain-impact {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--red);
+    }
+
+    /* REFS */
+    .ref-link {
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--blue);
+      text-decoration: none;
+      padding: 4px 0;
+      word-break: break-all;
+      transition: color 0.15s;
+    }
+
+    .ref-link:hover {
+      color: var(--cyan);
+    }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--text3);
+    }
+
+    .empty-icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 3px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      header {
+        padding: 0 16px;
+      }
+
+      .container {
+        padding: 28px 16px 60px;
+      }
+
+      .score-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .score-ring {
+        margin: 0 auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon">Z</div>
+      Zyntra<span>Vuln</span>
+    </div>
+    <div class="header-meta">Security Intelligence Engine</div>
+  </header>
+
+  <div class="container">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-tag">Powered by Davi </div>
+      <h1>Análise de <em>Vulnerabilidades</em><br>com IA</h1>
+      <p class="hero-sub">Cole um URL, endereço IP, domínio ou trecho de código para gerar um relatório técnico completo
+        de segurança ofensiva.</p>
+    </div>
+
+    <!-- SCAN CARD -->
+    <div class="scan-card">
+      <div class="input-label">Alvo para análise</div>
+      <div class="input-area">
+        <textarea id="inputArea"
+          placeholder="https://site.com/page?id=1&#10;192.168.1.1&#10;exemplo.com.br&#10;&#10;— ou cole código-fonte aqui —&#10;SELECT * FROM users WHERE id = '"
+          +id+"'" spellcheck="false" autocomplete="off"></textarea>
+        <div class="type-badge" id="typeBadge"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-scan" id="btnScan" onclick="executarScan()">
+          <span id="btnIcon">Z</span>
+          <span id="btnText">Iniciar Análise</span>
+        </button>
+        <button class="btn-clear" onclick="limpar()">Limpar</button>
+      </div>
+      <div class="status-bar" id="statusBar">Pronto para análise.</div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="results">
+      <div class="results-header">
+        <div class="results-title">// Relatório de Vulnerabilidades</div>
+        <button class="btn-copy-all" id="btnCopyAll" onclick="copiarTudo()">
+          <span>⧉</span> Copiar Relatório JSON
+        </button>
+      </div>
+
+      <!-- SCORE -->
+      <div class="score-panel" id="scorePanel">
+        <div class="score-ring">
+          <svg viewBox="0 0 90 90" width="90" height="90">
+            <circle class="track" cx="45" cy="45" r="38" />
+            <circle class="fill" id="scoreArc" cx="45" cy="45" r="38" stroke-dasharray="238.76"
+              stroke-dashoffset="238.76" />
+          </svg>
+          <div class="score-number">
+            <span class="num" id="scoreNum">0</span>
+            <span class="label">RISCO</span>
+          </div>
+        </div>
+        <div class="score-meta">
+          <div class="score-nivel" id="scoreNivel">—</div>
+          <div class="score-resumo" id="scoreResumo">—</div>
+          <div class="score-tags" id="scoreTags"></div>
+        </div>
+      </div>
+
+      <!-- VULNERABILIDADES -->
+      <div class="section" id="secVulns">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-title">
+            Vulnerabilidades Detectadas
+            <span class="section-count" id="vulnCount">0</span>
+          </div>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="section-body" id="vulnList"></div>
+      </div>
+
+      <!-- VETORES ENCADEADOS -->
+      <div class="section" id="secChains" style="display:none">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-title">
+            Ataques Encadeados
+            <span class="section-count" id="chainCount">0</span>
+          </div>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="section-body" id="chainList"></div>
+      </div>
+
+      <!-- SUPERFÍCIE DE ATAQUE -->
+      <div class="section" id="secSurface" style="display:none">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-title">Superfície de Ataque & Tecnologias</div>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="section-body" id="surfaceBody"></div>
+      </div>
+
+      <!-- RECOMENDAÇÕES -->
+      <div class="section" id="secRecs" style="display:none">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-title">Recomendações Gerais</div>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="section-body" id="recsList"></div>
+      </div>
+
+      <!-- REFERÊNCIAS -->
+      <div class="section" id="secRefs" style="display:none">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-title">Referências Técnicas</div>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="section-body" id="refsList"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    let ultimoResultado = null;
+
+    // Detecta tipo enquanto digita
+    const inputArea = document.getElementById('inputArea');
+    const typeBadge = document.getElementById('typeBadge');
+
+    inputArea.addEventListener('input', () => {
+      const val = inputArea.value.trim();
+      if (!val) { typeBadge.className = 'type-badge'; return; }
+      const tipo = detectarTipo(val);
+      typeBadge.textContent = tipo;
+      typeBadge.className = `type-badge visible ${tipo}`;
+    });
+
+    function detectarTipo(v) {
+      if (/^https?:\/\//i.test(v)) return 'URL';
+      if (/^\d{1,3}(\.\d{1,3}){3}(:\d+)?$/.test(v.split('\n')[0].trim())) return 'IP';
+      if (/^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/.test(v.split('\n')[0].trim()) && v.length < 100) return 'DOMINIO';
+      return 'CODIGO';
+    }
+
+    async function executarScan() {
+      const entrada = inputArea.value.trim();
+      if (!entrada) return;
+
+      setBtnLoading(true);
+      setStatus('Conectando ao motor de análise...', 'loading');
+      document.getElementById('results').style.display = 'none';
+
+      const msgs = [
+        'Analisando superfície de ataque...',
+        'Identificando vetores de vulnerabilidade...',
+        'Calculando CVSS e severidades...',
+        'Gerando relatório técnico...'
+      ];
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < msgs.length) setStatus(msgs[i++], 'loading');
+      }, 4000);
+
+      try {
+        const res = await fetch('/api/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ entrada })
+        });
+
+        clearInterval(interval);
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || `HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        ultimoResultado = data;
+        renderizar(data);
+        setStatus(`Análise concluída — ${(data.vulnerabilidades || []).length} vulnerabilidade(s) encontrada(s).`, '');
+      } catch (e) {
+        clearInterval(interval);
+        setStatus(`Erro: ${e.message}`, 'error');
+      } finally {
+        setBtnLoading(false);
+      }
+    }
+
+    function renderizar(d) {
+      // SCORE
+      const score = d.score_risco_geral || 0;
+      const arc = document.getElementById('scoreArc');
+      const circum = 238.76;
+      const offset = circum - (score / 100) * circum;
+      const cor = score >= 75 ? '#ff3b5c' : score >= 50 ? '#ff7b2d' : score >= 25 ? '#ffc72d' : '#00e676';
+      arc.style.stroke = cor;
+      setTimeout(() => { arc.style.strokeDashoffset = offset; }, 100);
+      document.getElementById('scoreNum').textContent = score;
+      document.getElementById('scoreNum').style.color = cor;
+
+      const nivel = d.nivel_risco || '—';
+      const nivelEl = document.getElementById('scoreNivel');
+      nivelEl.textContent = nivel;
+      nivelEl.style.color = cor;
+
+      document.getElementById('scoreResumo').textContent = d.resumo_executivo || '—';
+
+      const tagsEl = document.getElementById('scoreTags');
+      tagsEl.innerHTML = '';
+      const techs = d.tecnologias_detectadas || [];
+      techs.slice(0, 6).forEach(t => {
+        const s = document.createElement('span');
+        s.className = 'tag'; s.textContent = t;
+        tagsEl.appendChild(s);
+      });
+
+      // VULNS
+      const vulns = d.vulnerabilidades || [];
+      document.getElementById('vulnCount').textContent = vulns.length;
+      const vulnList = document.getElementById('vulnList');
+      vulnList.innerHTML = '';
+
+      if (vulns.length === 0) {
+        vulnList.innerHTML = '<div class="empty-state"><div class="empty-icon">✓</div><div>Nenhuma vulnerabilidade detectada.</div></div>';
+      } else {
+        vulns.forEach((v, idx) => {
+          vulnList.appendChild(criarVulnCard(v, idx));
+        });
+      }
+
+      // CHAINS
+      const chains = d.vetores_de_ataque_encadeados || [];
+      const secChains = document.getElementById('secChains');
+      if (chains.length > 0) {
+        secChains.style.display = '';
+        document.getElementById('chainCount').textContent = chains.length;
+        const chainList = document.getElementById('chainList');
+        chainList.innerHTML = '';
+        chains.forEach(c => {
+          const el = document.createElement('div');
+          el.className = 'chain-card';
+          el.innerHTML = `
+        <div class="chain-title">⛓ ${esc(c.nome || '—')}</div>
+        <div class="chain-desc">${esc(c.descricao || '')}</div>
+        <div class="chain-impact">⚠ Impacto final: ${esc(c.impacto_final || '—')}</div>
+        ${(c.vulns_envolvidas || []).length ? `<div style="margin-top:8px">${(c.vulns_envolvidas || []).map(x => `<span class="meta-chip">${esc(x)}</span>`).join(' ')}</div>` : ''}
+      `;
+          chainList.appendChild(el);
+        });
+      } else { secChains.style.display = 'none'; }
+
+      // SURFACE
+      const surf = d.superficie_de_ataque || [];
+      const secSurface = document.getElementById('secSurface');
+      if (surf.length > 0) {
+        secSurface.style.display = '';
+        const body = document.getElementById('surfaceBody');
+        body.innerHTML = `
+      <p class="vuln-section-label">Vetores de entrada</p>
+      <div class="list-items">${surf.map(s => `<div class="list-item">${esc(s)}</div>`).join('')}</div>
+      ${techs.length ? `<p class="vuln-section-label" style="margin-top:16px">Tecnologias inferidas</p><div class="score-tags">${techs.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
+    `;
+      } else { secSurface.style.display = 'none'; }
+
+      // RECOMENDAÇÕES
+      const recs = d.recomendacoes_gerais || [];
+      const secRecs = document.getElementById('secRecs');
+      if (recs.length > 0) {
+        secRecs.style.display = '';
+        document.getElementById('recsList').innerHTML =
+          `<div class="list-items">${recs.map(r => `<div class="list-item">${esc(r)}</div>`).join('')}</div>`;
+      } else { secRecs.style.display = 'none'; }
+
+      // REFERÊNCIAS
+      const refs = d.referencias_tecnicas || [];
+      const secRefs = document.getElementById('secRefs');
+      if (refs.length > 0) {
+        secRefs.style.display = '';
+        document.getElementById('refsList').innerHTML =
+          refs.map(r => {
+            const isUrl = /^https?:\/\//.test(r);
+            return isUrl
+              ? `<a href="${esc(r)}" target="_blank" rel="noopener" class="ref-link">↗ ${esc(r)}</a>`
+              : `<div class="ref-link" style="color:var(--text2);cursor:default">${esc(r)}</div>`;
+          }).join('');
+      } else { secRefs.style.display = 'none'; }
+
+      document.getElementById('results').style.display = 'block';
+      document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function criarVulnCard(v, idx) {
+      const el = document.createElement('div');
+      el.className = 'vuln-card';
+
+      const sev = (v.severidade || 'INFO').replace('Á', 'A').replace('É', 'E').replace('Ã', 'A');
+      const cvss = v.cvss_v3 || {};
+      const cvssScore = cvss.score || null;
+      const cvssColor = cvssScore >= 9 ? '#ff3b5c' : cvssScore >= 7 ? '#ff7b2d' : cvssScore >= 4 ? '#ffc72d' : '#00e676';
+
+      const difMap = { 'Trivial': 5, 'Baixa': 4, 'Média': 3, 'Media': 3, 'Alta': 2, 'Muito Alta': 1 };
+      const difDots = difMap[v.dificuldade_de_exploracao] || 3;
+
+      const dotsHtml = [1, 2, 3, 4, 5].map(i =>
+        `<div class="dif-dot" style="background:${i <= difDots ? 'var(--red)' : 'var(--border2)'}"></div>`
+      ).join('');
+
+      el.innerHTML = `
+    <div class="vuln-header" onclick="toggleVuln(this)">
+      <span class="sev-badge sev-${sev}">${esc(v.severidade || 'INFO')}</span>
+      <div class="vuln-title-group">
+        <div class="vuln-id">${esc(v.id || `VULN-${String(idx + 1).padStart(3, '0')}`)}</div>
+        <div class="vuln-title">${esc(v.titulo || 'Vulnerabilidade')}</div>
+        <div class="vuln-meta-row">
+          ${v.cwe ? `<span class="meta-chip">${esc(v.cwe)}</span>` : ''}
+          ${v.categoria ? `<span class="meta-chip">${esc(v.categoria)}</span>` : ''}
+          ${cvssScore !== null ? `<span class="meta-chip" style="color:${cvssColor}">CVSS ${cvssScore}</span>` : ''}
+          ${v.dificuldade_de_exploracao ? `<span class="meta-chip">Dif: ${esc(v.dificuldade_de_exploracao)}</span>` : ''}
+        </div>
+      </div>
+      <span class="vuln-chevron">▶</span>
+    </div>
+    <div class="vuln-body">
+
+      ${v.descricao_tecnica ? `
+        <div class="vuln-section-label">Descrição Técnica</div>
+        <div class="vuln-text">${esc(v.descricao_tecnica)}</div>
+      ` : ''}
+
+      ${v.localizacao ? `
+        <div class="vuln-section-label">Localização</div>
+        <div class="vuln-text">${esc(v.localizacao)}</div>
+      ` : ''}
+
+      ${cvss.score ? `
+        <div class="vuln-section-label">CVSS v3</div>
+        <div class="cvss-row">
+          <span class="cvss-score-big" style="color:${cvssColor}">${cvss.score}</span>
+          <div>
+            <div class="cvss-vector">${esc(cvss.vetor || '')}</div>
+            <div class="vuln-text" style="margin-top:4px">${esc(cvss.impacto || '')}</div>
+          </div>
+        </div>
+      ` : ''}
+
+      ${v.prova_de_conceito ? `
+        <div class="vuln-section-label">Prova de Conceito (PoC)</div>
+        <div class="code-block" style="position:relative">
+          <button class="btn-copy-snippet" onclick="copiarBloco(this, event)">Copiar</button>${esc(v.prova_de_conceito)}</div>
+      ` : ''}
+
+      ${v.impacto_real ? `
+        <div class="vuln-section-label">Impacto Real</div>
+        <div class="vuln-text">${esc(v.impacto_real)}</div>
+      ` : ''}
+
+      ${v.condicoes_de_exploracao ? `
+        <div class="vuln-section-label">Condições de Exploração</div>
+        <div class="vuln-text">${esc(v.condicoes_de_exploracao)}</div>
+      ` : ''}
+
+      ${v.dificuldade_de_exploracao ? `
+        <div class="vuln-section-label">Dificuldade</div>
+        <div class="dificuldade-bar">${dotsHtml}<span style="margin-left:8px;font-family:var(--mono);font-size:0.75rem;color:var(--text2)">${esc(v.dificuldade_de_exploracao)}</span></div>
+      ` : ''}
+
+      ${(v.vetores_de_exploracao || []).length ? `
+        <div class="vuln-section-label">Vetores de Exploração</div>
+        <div class="list-items">${(v.vetores_de_exploracao || []).map(x => `<div class="list-item">${esc(x)}</div>`).join('')}</div>
+      ` : ''}
+
+      ${(v.ferramentas_de_ataque || []).length ? `
+        <div class="vuln-section-label">Ferramentas de Ataque</div>
+        <div class="score-tags">${(v.ferramentas_de_ataque || []).map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
+      ` : ''}
+
+      ${(v.cve_relacionados || []).length ? `
+        <div class="vuln-section-label">CVEs Relacionados</div>
+        <div class="score-tags">${(v.cve_relacionados || []).map(c => `<span class="tag" style="color:var(--red)">${esc(c)}</span>`).join('')}</div>
+      ` : ''}
+
+      ${v.remediacoes ? `
+        <div class="vuln-section-label">Remediação Imediata</div>
+        <div class="vuln-text">${esc((v.remediacoes.imediata || ''))}</div>
+        ${v.remediacoes.correta ? `
+          <div class="vuln-section-label" style="margin-top:12px">Correção Definitiva</div>
+          <div class="code-block" style="position:relative">
+            <button class="btn-copy-snippet" onclick="copiarBloco(this, event)">Copiar</button>${esc(v.remediacoes.correta)}</div>
+        ` : ''}
+        ${(v.remediacoes.referencias || []).length ? `
+          <div style="margin-top:10px">${(v.remediacoes.referencias || []).map(r => {
+        const isUrl = /^https?:\/\//.test(r);
+        return isUrl ? `<a href="${esc(r)}" target="_blank" rel="noopener" class="ref-link">↗ ${esc(r)}</a>` : `<div class="ref-link" style="color:var(--text2)">${esc(r)}</div>`;
+      }).join('')}</div>
+        ` : ''}
+      ` : ''}
+
+      ${v.notas_adicionais ? `
+        <div class="vuln-section-label">Notas Adicionais</div>
+        <div class="vuln-text">${esc(v.notas_adicionais)}</div>
+      ` : ''}
+
+    </div>
+  `;
+      return el;
+    }
+
+    function toggleVuln(header) {
+      const card = header.closest('.vuln-card');
+      card.classList.toggle('open');
+    }
+
+    function toggleSection(header) {
+      const section = header.closest('.section');
+      section.classList.toggle('collapsed');
+    }
+
+    function limpar() {
+      inputArea.value = '';
+      typeBadge.className = 'type-badge';
+      document.getElementById('results').style.display = 'none';
+      setStatus('Pronto para análise.', '');
+      ultimoResultado = null;
+    }
+
+    function setStatus(msg, tipo) {
+      const el = document.getElementById('statusBar');
+      el.textContent = msg;
+      el.className = `status-bar ${tipo}`;
+    }
+
+    function setBtnLoading(loading) {
+      const btn = document.getElementById('btnScan');
+      const icon = document.getElementById('btnIcon');
+      const txt = document.getElementById('btnText');
+      btn.disabled = loading;
+      if (loading) {
+        icon.outerHTML = '<div class="spinner" id="btnIcon"></div>';
+        txt.textContent = 'Analisando...';
+      } else {
+        document.getElementById('btnIcon').outerHTML = '<span id="btnIcon">⬡</span>';
+        txt.textContent = 'Iniciar Análise';
+      }
+    }
+
+    async function copiarTudo() {
+      if (!ultimoResultado) return;
+      const btn = document.getElementById('btnCopyAll');
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(ultimoResultado, null, 2));
+        btn.textContent = '✓ Copiado!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = '<span>⧉</span> Copiar Relatório JSON';
+          btn.classList.remove('copied');
+        }, 2000);
+      } catch { }
+    }
+
+    async function copiarBloco(btn, e) {
+      e.stopPropagation();
+      const bloco = btn.closest('.code-block');
+      const texto = bloco.innerText.replace('Copiar\n', '').replace('✓ Copiado!\n', '');
+      try {
+        await navigator.clipboard.writeText(texto.trim());
+        btn.textContent = '✓ Copiado!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+      } catch { }
+    }
+
+    function esc(s) {
+      if (typeof s !== 'string') s = String(s ?? '');
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Enter no textarea não quebra (permite quebra de linha com Shift+Enter)
+    inputArea.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey && detectarTipo(inputArea.value.trim()) !== 'CODIGO') {
+        e.preventDefault();
+        executarScan();
+      }
+    });
+  </script>
+</body>
+
+</html>
